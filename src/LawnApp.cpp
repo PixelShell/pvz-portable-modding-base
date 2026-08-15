@@ -186,6 +186,13 @@ LawnApp::LawnApp()
 	mCrazyDaveBlinkCounter = 0;
 	mCrazyDaveBlinkReanimID = ReanimationID::REANIMATIONID_NULL;
 	mCrazyDaveMessageIndex = -1;
+	mIsFastMode = false;
+	mSpeedModifier = 2;
+
+	#ifdef PVZ_DEBUG
+    mCheatKeys = true;
+    mDebugKeysEnabled = true;
+#endif
 }
 
 LawnApp::~LawnApp()
@@ -1340,17 +1347,7 @@ bool LawnApp::DebugKeyDown(int theKey)
 
 void LawnApp::HandleCmdLineParam(std::string_view theParamName, std::string_view theParamValue)
 {
-	if (theParamName == "-cheat")
-	{
-#ifdef PVZ_DEBUG
-		mCheatKeys = true;
-		mDebugKeysEnabled = true;
-#endif
-	}
-	else
-	{
-		SexyApp::HandleCmdLineParam(theParamName, theParamValue);
-	}
+	SexyApp::HandleCmdLineParam(theParamName, theParamValue);
 }
 
 bool LawnApp::UpdatePlayerProfileForFinishingLevel()
@@ -1459,6 +1456,8 @@ void LawnApp::CheckForGameEnd()
 {
 	if (mBoard == nullptr || !mBoard->mLevelComplete)
 		return;
+
+	mIsFastMode = false;
 
 	bool aUnlockedNewChallenge = UpdatePlayerProfileForFinishingLevel();
 
@@ -1637,6 +1636,10 @@ void LawnApp::UpdateFrames()
 	else if (gFastMo)
 	{
 		aUpdateCount = 20;
+	}
+	else if (mIsFastMode)
+	{
+		aUpdateCount = mSpeedModifier;
 	}
 
 	for (int i = 0; i < aUpdateCount; i++)

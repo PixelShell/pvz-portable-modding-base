@@ -198,6 +198,8 @@ Board::Board(LawnApp* theApp)
 	mMenuButton->mDrawStoneButton = true;
 	mStoreButton = nullptr;
 	mIgnoreMouseUp = false;
+	mFastButton = new GameButton(2);
+	mFastButton->Resize(720, 28, IMAGE_FASTBUTTON->mWidth, 46);
 
 	if (mApp->mGameMode == GameMode::GAMEMODE_CHALLENGE_ZEN_GARDEN || mApp->mGameMode == GameMode::GAMEMODE_TREE_OF_WISDOM)
 	{
@@ -215,6 +217,7 @@ Board::Board(LawnApp* theApp)
 	{
 		mMenuButton->SetLabel("[MENU_BUTTON]");
 		mMenuButton->Resize(681, -10, 117, 46);
+		mFastButton->mBtnNoDraw = false;
 	}
 
 	if (mApp->mGameMode == GameMode::GAMEMODE_CHALLENGE_LAST_STAND)
@@ -250,6 +253,10 @@ Board::~Board()
 	if (mStoreButton)
 	{
 		delete mStoreButton;
+	}
+	if (mFastButton)
+	{
+		delete mFastButton;
 	}
 	mZombies.DataArrayDispose();
 	mPlants.DataArrayDispose();
@@ -395,6 +402,8 @@ bool Board::LoadGame(const std::string& theFileName)
 	mApp->ClearUpdateBacklog();
 	ResetFPSStats();
 	UpdateLayers();
+	if (mApp->mGameScene == GameScenes::SCENE_PLAYING)
+		mFastButton->mBtnNoDraw = false;
 	return true;
 }
 
@@ -1948,6 +1957,7 @@ void Board::FadeOutLevel()
 		}
 	}
 
+	mApp->mIsFastMode = false;
 	mApp->SetCursor(CURSOR_POINTER);
 }
 
@@ -2977,6 +2987,7 @@ void Board::UpdateCursor()
 	case GameObjectType::OBJECT_TYPE_TREE_OF_WISDOM:
 	case GameObjectType::OBJECT_TYPE_COIN:
 	case GameObjectType::OBJECT_TYPE_PROJECTILE:
+	case GameObjectType::OBJECT_TYPE_FASTMODE_BUTTON:
 		aShowFinger = true;
 		break;
 
@@ -4155,6 +4166,11 @@ bool Board::MouseHitTest(int x, int y, HitResult* theHitResult)
 		theHitResult->mObjectType = GameObjectType::OBJECT_TYPE_STORE_BUTTON;
 		return true;
 	}
+	else if (mFastButton->IsMouseOver() && CanInteractWithBoardButtons())
+	{
+		theHitResult->mObjectType = GameObjectType::OBJECT_TYPE_FASTMODE_BUTTON;
+		return true;
+	}
 
 	Rect aShovelButtonRect = GetShovelButtonRect();
 	if (mSeedBank->MouseHitTest(x, y, theHitResult))
@@ -4408,6 +4424,10 @@ void Board::MouseDown(int x, int y, int theClickCount)
 	{
 		mApp->PlaySample(Sexy::SOUND_GRAVEBUTTON);
 	}
+	else if (mFastButton->IsMouseOver() && CanInteractWithBoardButtons() && theClickCount > 0)
+	{
+		mApp->PlaySample(Sexy::SOUND_TAP);
+	}
 	else if (mStoreButton && mStoreButton->IsMouseOver() && CanInteractWithBoardButtons() && theClickCount > 0)
 	{
 		if (mApp->mGameMode == GameMode::GAMEMODE_CHALLENGE_ZEN_GARDEN || mApp->mGameMode == GameMode::GAMEMODE_TREE_OF_WISDOM)
@@ -4643,6 +4663,13 @@ void Board::MouseUp(int x, int y, int theClickCount)
 				mApp->mBoardResult = BoardResult::BOARDRESULT_QUIT;
 				mApp->DoBackToMain();
 			}
+		}
+		else if (mFastButton->IsMouseOver() && !mApp->GetDialog(Dialogs::DIALOG_GAME_OVER) && !mApp->GetDialog(Dialogs::DIALOG_LEVEL_COMPLETE) && mBoardFadeOutCounter < 0)
+		{
+			mFastButton->mIsOver = false;
+			mFastButton->mIsDown = false;
+			UpdateCursor();
+			mApp->mIsFastMode = !mApp->mIsFastMode;
 		}
 		else if(mStoreButton && mStoreButton->IsMouseOver())
 		{
@@ -5079,6 +5106,7 @@ void Board::PuzzleSaveStreak()
 
 void Board::ZombiesWon(Zombie* theZombie)
 {
+	mApp->mIsFastMode = false;
 	if (mApp->mGameScene == GameScenes::SCENE_ZOMBIES_WON)
 		return;
 
@@ -5728,6 +5756,16 @@ void Board::Update()
 	Widget::Update();
 	MarkDirty();
 
+	if (mPaused && mApp->mIsFastMode)
+		mApp->mIsFastMode = false;
+
+	if (mFastButton != nullptr && !mFastButton->mBtnNoDraw)
+	{
+		mFastButton->mButtonImage = !mApp->mIsFastMode ? IMAGE_FASTBUTTON : IMAGE_FASTBUTTON_HIGHLIGHT;
+		mFastButton->mOverImage = !mApp->mIsFastMode ? IMAGE_FASTBUTTON : IMAGE_FASTBUTTON_HIGHLIGHT;
+		mFastButton->mDownImage = !mApp->mIsFastMode ? IMAGE_FASTBUTTON_HIGHLIGHT : IMAGE_FASTBUTTON;
+	}
+
 	mBoardUpdateCounter++;
 	mCutScene->Update();
 	UpdateMousePosition();
@@ -5759,6 +5797,12 @@ void Board::Update()
 		mStoreButton->mDisabled = aDisabled;
 		mStoreButton->Update();
 	}
+
+	if (!mFastButton->mBtnNoDraw)
+	{
+		mFastButton->mDisabled = aDisabled;
+	}
+	mFastButton->Update();
 
 	mApp->mEffectSystem->Update();
 	mAdvice->Update();
@@ -7409,6 +7453,8 @@ void Board::DrawUITop(Graphics* g)
 		DrawTopRightUI(g);
 	}
 
+	mFastButton->Draw(g);
+
 	if (mTimeStopCounter > 0)
 	{
 		g->SetColor(Color(200, 200, 200, 210));
@@ -7694,6 +7740,10 @@ void Board::KeyDown(KeyCode theKey)
 			mApp->DoNewOptions(false);
 		}
 	}
+	else if (theKey == KeyCode::KEYCODE_TAB)
+    {
+        mApp->mIsFastMode = !mApp->mIsFastMode;
+    }
 }
 
 static void PvzpCrash()
@@ -7708,6 +7758,52 @@ void Board::KeyChar(char theChar)
 
 	PvzpTraceAndLogLn("Board cheat key '%c'", theChar);
 
+	if (isdigit(theChar)&& mSeedBank->mY >= 0)
+	{
+		for (int i = 0; i < mSeedBank->mNumPackets; i++)
+		{
+			int aSeedIndex = i;
+			if (theChar == '0' + aSeedIndex && mSeedBank->mNumPackets > aSeedIndex)
+			{
+				aSeedIndex--;
+				SeedPacket* aPacket = &mSeedBank->mSeedPackets[aSeedIndex];
+				if (aPacket->mPacketType == SeedType::SEED_NONE)	
+					break;
+
+				if (mCursorObject->mSeedBankIndex == aSeedIndex)
+				{
+					RefreshSeedPacketFromCursor();
+					mApp->PlayFoley(FoleyType::FOLEY_DROP);
+				}
+				else
+				{
+					if (mCursorObject->mCursorType != CursorType::CURSOR_TYPE_PLANT_FROM_BANK || mCursorObject->mSeedBankIndex != aSeedIndex)
+					{
+						if (mCursorObject->mCursorType == CursorType::CURSOR_TYPE_PLANT_FROM_BANK)
+							RefreshSeedPacketFromCursor();
+						else
+							ClearCursor();
+					}
+					aPacket->MouseDown(0, 0, 0);
+				}
+				break;
+			}
+		}
+	}
+	else if (theChar == '"' && mShowShovel)
+	{
+		if (mCursorObject->mCursorType != CursorType::CURSOR_TYPE_SHOVEL)
+		{
+			if (mCursorObject->mCursorType == CursorType::CURSOR_TYPE_PLANT_FROM_BANK)
+				RefreshSeedPacketFromCursor();
+			PickUpTool(GameObjectType::OBJECT_TYPE_SHOVEL);
+		}
+		else
+		{
+			ClearCursor();
+			mApp->PlayFoley(FoleyType::FOLEY_DROP);
+		}
+	}
 	if (mApp->mGameMode == GameMode::GAMEMODE_CHALLENGE_ZEN_GARDEN)
 	{
 		if (theChar == 'm')

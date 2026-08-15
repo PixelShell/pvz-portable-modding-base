@@ -1586,6 +1586,8 @@ Image* Sexy::IMAGE_ZOMBIE_BOSS_ICEBALL_PARTICLES;
 Image* Sexy::IMAGE_ZOMBIE_NOTE_SMALL;
 Image* Sexy::IMAGE_ZOMBIE_SEAWEED;
 Image* Sexy::IMAGE_ZOMBOSS_PARTICLES;
+Image* Sexy::IMAGE_FASTBUTTON;
+Image* Sexy::IMAGE_FASTBUTTON_HIGHLIGHT;
 
 bool Sexy::ExtractLoadingImagesResources(ResourceManager* theManager)
 {
@@ -1961,6 +1963,8 @@ bool Sexy::ExtractLoadingImagesResources(ResourceManager* theManager)
 		IMAGE_ZOMBIE_NOTE_SMALL = aMgr.GetImageThrow("IMAGE_ZOMBIE_NOTE_SMALL");
 		IMAGE_ZOMBIE_SEAWEED = aMgr.GetImageThrow("IMAGE_ZOMBIE_SEAWEED");
 		IMAGE_ZOMBOSS_PARTICLES = aMgr.GetImageThrow("IMAGE_ZOMBOSS_PARTICLES");
+		IMAGE_FASTBUTTON = aMgr.GetImageThrow("IMAGE_FASTBUTTON");
+		IMAGE_FASTBUTTON_HIGHLIGHT = aMgr.GetImageThrow("IMAGE_FASTBUTTON_HIGHLIGHT");
 	}
 	catch (ResourceManagerException&)
 	{
@@ -3198,7 +3202,9 @@ void* gResources[static_cast<int>(Sexy::ResourceId::RESOURCE_ID_MAX)] =
 	&Sexy::IMAGE_ZOMBATAR_DISPLAY_WINDOW,
 	&Sexy::IMAGE_ZOMBATAR_MAINMENUBACK_HIGHLIGHT,
 	&Sexy::IMAGE_ZOMBATAR_VIEW_BUTTON,
-	&Sexy::IMAGE_ZOMBATAR_VIEW_BUTTON_HIGHLIGHT
+	&Sexy::IMAGE_ZOMBATAR_VIEW_BUTTON_HIGHLIGHT,
+	&Sexy::IMAGE_FASTBUTTON,
+	&Sexy::IMAGE_FASTBUTTON_HIGHLIGHT
 };
 
 Sexy::Image* Sexy::GetImageById(ResourceId theId)

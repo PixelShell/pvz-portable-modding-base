@@ -320,6 +320,7 @@ enum Dialogs : int32_t
 	DIALOG_PURCHASE_PACKET_SLOT,                // 50
 	DIALOG_ZOMBATAR_TOS,                        // 51: terms of service
 	DIALOG_ZOMBATAR_DELETE,                     // 52
+	DIALOG_EXTRAOPTIONS,						// 53
 	NUM_DIALOGS
 };
 enum DebugTextMode : int32_t
@@ -476,7 +477,8 @@ enum GameObjectType : int32_t
 	OBJECT_TYPE_SLOT_MACHINE_HANDLE,
 	OBJECT_TYPE_SCARY_POT,
 	OBJECT_TYPE_STINKY,
-	OBJECT_TYPE_TREE_OF_WISDOM
+	OBJECT_TYPE_TREE_OF_WISDOM,
+	OBJECT_TYPE_FASTMODE_BUTTON
 };
 enum GameScenes : int32_t
 {

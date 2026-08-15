@@ -139,6 +139,7 @@ public:
 	SeedBank*						mSeedBank;
 	GameButton*						mMenuButton;
 	GameButton*						mStoreButton;
+	GameButton*						mFastButton;
 	bool							mIgnoreMouseUp;
 	ToolTipWidget*					mToolTip;
 	CutScene*						mCutScene;

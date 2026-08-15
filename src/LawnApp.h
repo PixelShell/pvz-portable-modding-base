@@ -140,10 +140,14 @@ public:
 	TrialType						mTrialType;
 	bool							mDebugTrialLocked;
 	bool							mMuteSoundsForCutscene;
+	bool							mIsFastMode;
+	float							mSpeedModifier;
 
 public:
 	LawnApp();
 	~LawnApp() override;
+
+	void						    DoExtraOptions(bool theFromGameSelector, int x, int y);
 
 	bool							KillNewOptionsDialog();
 	void							GotFocus() override;
