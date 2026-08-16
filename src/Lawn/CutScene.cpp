@@ -691,6 +691,7 @@ void CutScene::StartLevelIntro()
 	mCutsceneTime = 0;
 	mBoard->mSeedBank->Move(SEED_BANK_OFFSET_X, -IMAGE_SEEDBANK->GetHeight());
 	mBoard->mMenuButton->mBtnNoDraw = true;
+	mBoard->mFastButton->mBtnNoDraw = true;
 	mApp->mSeedChooserScreen->mMouseVisible = false;
 	mApp->mSeedChooserScreen->Move(0, SEED_CHOOSER_OFFSET_Y);
 	mApp->mSeedChooserScreen->mMenuButton->mBtnNoDraw = true;
@@ -834,6 +835,7 @@ void CutScene::StartLevelIntro()
 		mCrazyDaveDialogStart = 3300;
 		mUpsellHideBoard = true;
 		mBoard->mMenuButton->mBtnNoDraw = false;
+		mBoard->mFastButton->mBtnNoDraw = false;
 	}
 	else if (mApp->mGameMode == GameMode::GAMEMODE_SCARY_POTTER_1 && !mApp->HasBeatenChallenge(GameMode::GAMEMODE_SCARY_POTTER_1))
 	{
@@ -1463,6 +1465,7 @@ void CutScene::StartZombiesWon()
 {
 	mCutsceneTime = 0;
 	mBoard->mMenuButton->mBtnNoDraw = true;
+	mBoard->mFastButton->mBtnNoDraw = true;
 	mBoard->mShowShovel = false;
 	mApp->mMusic->StopAllMusic();
 	mBoard->StopAllZombieSounds();
@@ -1559,6 +1562,7 @@ void CutScene::AdvanceCrazyDaveDialog(bool theJustSkipping)
 	{
 		mApp->mPlayerInfo->mPurchases[STORE_ITEM_TREE_FOOD] = PURCHASE_COUNT_OFFSET + 5;
 		mBoard->mMenuButton->mBtnNoDraw = false;
+		mBoard->mFastButton->mBtnNoDraw = false;
 		mBoard->mStoreButton->mBtnNoDraw = false;
 	}
 
@@ -2107,6 +2111,7 @@ void CutScene::UpdateUpsell()
 			mBoard->mStoreButton->Resize(510, 420, 210, 46);
 			mBoard->mMenuButton->Resize(510, 480, 210, 46);
 			mBoard->mMenuButton->mBtnNoDraw = false;
+			mBoard->mFastButton->mBtnNoDraw = false;
 			mBoard->mStoreButton->mBtnNoDraw = false;
 		}
 		return;

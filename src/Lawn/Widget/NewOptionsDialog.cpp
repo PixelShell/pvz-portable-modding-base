@@ -46,6 +46,11 @@ NewOptionsDialog::NewOptionsDialog(LawnApp* theApp, bool theFromGameSelector) :
 	mRestartButton = MakeButton(NewOptionsDialog::NewOptionsDialog_Restart, this, "[RESTART_LEVEL]");
 	mBackToMainButton = MakeButton(NewOptionsDialog::NewOptionsDialog_MainMenu, this, "[MAIN_MENU_BUTTON]");
 
+	if (theFromGameSelector)
+		mExtraOptionsButton = MakeButton(NewOptionsDialog::NewOptionsDialog_Extra, this, "[EXTRA_OPTIONS]");
+	else
+		mExtraOptionsButton = MakeButton(NewOptionsDialog::NewOptionsDialog_Extra, this, "[EXTRA_OPTIONS_INGAME]");
+
 	mBackToGameButton = MakeNewButton(
 		Dialog::ID_OK,
 		this,
@@ -121,6 +126,7 @@ NewOptionsDialog::~NewOptionsDialog()
 	delete mRestartButton;
 	delete mBackToMainButton;
 	delete mBackToGameButton;
+	delete mExtraOptionsButton;
 }
 
 int NewOptionsDialog::GetPreferredHeight(int theWidth)
@@ -140,6 +146,7 @@ void NewOptionsDialog::AddedToManager(Sexy::WidgetManager* theWidgetManager)
 	AddWidget(mHardwareAccelerationCheckbox);
 	AddWidget(mFullscreenCheckbox);
 	AddWidget(mBackToGameButton);
+	AddWidget(mExtraOptionsButton);
 }
 
 void NewOptionsDialog::RemovedFromManager(Sexy::WidgetManager* theWidgetManager)
@@ -153,6 +160,7 @@ void NewOptionsDialog::RemovedFromManager(Sexy::WidgetManager* theWidgetManager)
 	RemoveWidget(mBackToMainButton);
 	RemoveWidget(mBackToGameButton);
 	RemoveWidget(mRestartButton);
+	RemoveWidget(mExtraOptionsButton);
 }
 
 void NewOptionsDialog::Resize(int theX, int theY, int theWidth, int theHeight)
@@ -166,6 +174,14 @@ void NewOptionsDialog::Resize(int theX, int theY, int theWidth, int theHeight)
 	mRestartButton->Resize(mAlmanacButton->mX, mAlmanacButton->mY + 43, 209, 46);
 	mBackToMainButton->Resize(mRestartButton->mX, mRestartButton->mY + 43, 209, 46);
 	mBackToGameButton->Resize(30, 381, mBackToGameButton->mWidth, mBackToGameButton->mHeight);
+	if (mFromGameSelector)
+	{
+		mExtraOptionsButton->Resize(107, 320, 209, 46);
+	}
+	else
+	{
+		mExtraOptionsButton->Resize(360, 327, 66, 46);
+	}
 
 	if (mFromGameSelector)
 	{
@@ -393,6 +409,11 @@ void NewOptionsDialog::ButtonDepress(int theId)
 			}
 		}
 		break;
+
+		case (NewOptionsDialog::NewOptionsDialog_Extra):
+			mApp->DoExtraOptions(mFromGameSelector);
+			mApp->KillNewOptionsDialog();
+			break;
 	}
 
 	case NewOptionsDialog::NewOptionsDialog_Update:

@@ -217,7 +217,6 @@ Board::Board(LawnApp* theApp)
 	{
 		mMenuButton->SetLabel("[MENU_BUTTON]");
 		mMenuButton->Resize(681, -10, 117, 46);
-		mFastButton->mBtnNoDraw = false;
 	}
 
 	if (mApp->mGameMode == GameMode::GAMEMODE_CHALLENGE_LAST_STAND)
@@ -7753,19 +7752,13 @@ static void PvzpCrash()
 
 void Board::KeyChar(char theChar)
 {
-	if (!mApp->mDebugKeysEnabled)
-		return;
-
-	PvzpTraceAndLogLn("Board cheat key '%c'", theChar);
-
-	if (isdigit(theChar)&& mSeedBank->mY >= 0)
+	if (isdigit(theChar) && mSeedBank->mY >= 0)
 	{
 		for (int i = 0; i < mSeedBank->mNumPackets; i++)
 		{
 			int aSeedIndex = i;
-			if (theChar == '0' + aSeedIndex && mSeedBank->mNumPackets > aSeedIndex)
+			if (theChar == '1' + aSeedIndex && mSeedBank->mNumPackets > aSeedIndex)
 			{
-				aSeedIndex--;
 				SeedPacket* aPacket = &mSeedBank->mSeedPackets[aSeedIndex];
 				if (aPacket->mPacketType == SeedType::SEED_NONE)	
 					break;
@@ -7804,6 +7797,12 @@ void Board::KeyChar(char theChar)
 			mApp->PlayFoley(FoleyType::FOLEY_DROP);
 		}
 	}
+
+	if (!mApp->mDebugKeysEnabled)
+		return;
+
+	PvzpTraceAndLogLn("Board cheat key '%c'", theChar);
+
 	if (mApp->mGameMode == GameMode::GAMEMODE_CHALLENGE_ZEN_GARDEN)
 	{
 		if (theChar == 'm')
