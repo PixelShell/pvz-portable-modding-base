@@ -7,7 +7,9 @@
             "generator": "Ninja",
             "binaryDir": "${sourceDir}/build/linux-debug",
             "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Debug"
+                "CMAKE_BUILD_TYPE": "Debug",
+                "CMAKE_RUNTIME_OUTPUT_DIRECTORY": "${sourceDir}/build/linux-debug/result",
+                "CMAKE_LIBRARY_OUTPUT_DIRECTORY": "${sourceDir}/build/linux-debug/result"
             }
         },
         {
@@ -16,7 +18,9 @@
             "generator": "Ninja",
             "binaryDir": "${sourceDir}/build/linux-release",
             "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Release"
+                "CMAKE_BUILD_TYPE": "Release",
+                "CMAKE_RUNTIME_OUTPUT_DIRECTORY": "${sourceDir}/build/linux-release/result",
+                "CMAKE_LIBRARY_OUTPUT_DIRECTORY": "${sourceDir}/build/linux-release/result"
             }
         },
         {

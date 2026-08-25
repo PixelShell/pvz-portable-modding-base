@@ -179,6 +179,8 @@ public:
 	bool					mStandardWordWrap;
 	bool					mbAllowExtendedChars;
 
+	bool 					mAutoCollect;
+	bool 					mHealthbarEnabled;
 
 	bool					mOnlyAllowOneCopyToRun;
 	unsigned int			mNotifyGameMessage;

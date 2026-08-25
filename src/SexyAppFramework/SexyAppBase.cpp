@@ -1108,6 +1108,8 @@ void SexyAppBase::WriteToRegistry()
 	RegistryWriteInteger("CustomCursors", mCustomCursorsEnabled ? 1 : 0);
 	RegistryWriteInteger("InProgress", 0);
 	RegistryWriteBoolean("WaitForVSync", mWaitForVSync);
+	RegistryWriteBoolean("AutoCollect", mAutoCollect);
+	RegistryWriteBoolean("HealthbarEnabled", mHealthbarEnabled);
 }
 
 bool SexyAppBase::RegistryEraseKey(const std::string& _theKeyName)
@@ -1366,6 +1368,8 @@ void SexyAppBase::ReadFromRegistry()
 		EnableCustomCursors(anInt != 0);
 
 	RegistryReadBoolean("WaitForVSync", &mWaitForVSync);
+	RegistryReadBoolean("AutoCollect", &mAutoCollect);
+	RegistryReadBoolean("HealthbarEnabled", &mHealthbarEnabled);
 
 	if (RegistryReadInteger("InProgress", &anInt))
 		mLastShutdownWasGraceful = anInt == 0;

@@ -37,6 +37,7 @@
 #include "../PvzpLib/Reanimator.h"
 #include "../PvzpLib/Attachment.h"
 #include "Widget/AchievementsScreen.h"
+#include "../SexyAppFramework/widget/WidgetManager.h"
 
 Coin::Coin()
 {
@@ -767,6 +768,15 @@ void Coin::Update()
 			AttachmentOverrideColor(mAttachmentID, Color(0, 0, 0, 0));  // moving silver/gold coins use a static image, so hide the attachment's animation
 		}
 	}
+
+	if (mApp->mAutoCollect)
+    {
+        int aMouseX = mApp->mWidgetManager->mLastMouseX - mX;
+        int aMouseY = mApp->mWidgetManager->mLastMouseY - mY;
+        HitResult aHitResultCoin;
+        if (MouseHitTest(aMouseX, aMouseY, &aHitResultCoin))
+            MouseDown(aMouseX, aMouseY, 0);
+    }
 }
 
 Color Coin::GetColor()

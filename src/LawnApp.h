@@ -140,6 +140,7 @@ public:
 	TrialType						mTrialType;
 	bool							mDebugTrialLocked;
 	bool							mMuteSoundsForCutscene;
+
 	bool							mIsFastMode;
 	float							mSpeedModifier;
 

@@ -22,6 +22,7 @@
 #include <time.h>
 #include <algorithm>
 #include <SDL.h>
+#include "ConstEnums.h"
 #include "ZenGarden.h"
 #include "BoardInclude.h"
 #include "LawnCommon.h"
@@ -1689,6 +1690,10 @@ void Board::StartLevel()
 		mApp->mSoundSystem->GamePause(false);
 	}
 
+	if (mApp->mGameMode != GameMode::GAMEMODE_CHALLENGE_ZEN_GARDEN &&
+		mApp->mGameMode != GameMode::GAMEMODE_TREE_OF_WISDOM)
+		mFastButton->mBtnNoDraw = false;
+
 	if (mApp->mGameMode == GameMode::GAMEMODE_CHALLENGE_ICE ||
 		mApp->mGameMode == GameMode::GAMEMODE_CHALLENGE_ZEN_GARDEN ||
 		mApp->mGameMode == GameMode::GAMEMODE_TREE_OF_WISDOM ||
@@ -1696,7 +1701,6 @@ void Board::StartLevel()
 		mApp->mGameMode == GameMode::GAMEMODE_INTRO ||
 		mApp->IsFinalBossLevel())
 		return;
-
 	mApp->mMusic->StartGameMusic();
 }
 
@@ -6179,6 +6183,14 @@ void Board::DrawGameObjects(Graphics* g)
 					aRenderItemCount++;
 				}
 			}
+			if (mApp->mHealthbarEnabled && !aPlant->mSquished && mApp->mGameMode != GAMEMODE_CHALLENGE_ZEN_GARDEN)
+			{
+				RenderItem& aRenderItem = aRenderList[aRenderItemCount];
+				aRenderItem.mRenderObjectType = RenderObjectType::RENDER_ITEM_HEALTHBAR_PLANT;
+				aRenderItem.mZPos = aPlant->mRenderOrder + 99;
+				aRenderItem.mPlant = aPlant;
+				aRenderItemCount++;
+			}
 		}
 	}
 	{
@@ -6219,6 +6231,15 @@ void Board::DrawGameObjects(Graphics* g)
 					aRenderItem.mZombie = aZombie;
 					aRenderItemCount++;
 				}
+			}
+
+			if (mApp->mHealthbarEnabled)
+			{
+				RenderItem& aRenderItem = aRenderList[aRenderItemCount];
+				aRenderItem.mRenderObjectType = RenderObjectType::RENDER_ITEM_HEALTHBAR_ZOMBIE;
+				aRenderItem.mZPos = aZombie->mRenderOrder + 99;
+				aRenderItem.mZombie = aZombie;
+				aRenderItemCount++;
 			}
 		}
 	}
@@ -6555,6 +6576,76 @@ void Board::DrawGameObjects(Graphics* g)
 			DrawFadeOut(g);
 			break;
 
+		case RenderObjectType::RENDER_ITEM_HEALTHBAR_PLANT:
+		{
+			Plant* aPlant = aRenderItem.mPlant;
+			int barWidth = 3;
+			int barHeight = 55;
+			int barPosX = aPlant->mX;
+			int barPosY = aPlant->mY;
+			int xOffset = 5;
+
+			bool isPumpkin = aPlant->mSeedType == SeedType::SEED_PUMPKINSHELL || aPlant->mImitaterType == SeedType::SEED_PUMPKINSHELL;
+			bool isPot = aPlant->mSeedType == SeedType::SEED_FLOWERPOT || aPlant->mImitaterType == SeedType::SEED_FLOWERPOT;
+			bool isLilypad = aPlant->mSeedType == SeedType::SEED_LILYPAD || aPlant->mImitaterType == SeedType::SEED_LILYPAD;
+
+			Color hpColor;
+			if (Plant::IsUpgrade(aPlant->mSeedType))
+			hpColor = Color(170, 120, 200);
+			else if (isLilypad)
+			{
+				hpColor = Color(0, 237, 138);
+				barPosX -= xOffset;
+			}
+			else if (isPot)
+			{
+				hpColor = Color(148, 69, 0);
+				barPosX -= xOffset;
+			}
+			else if (isPumpkin)
+			{
+				hpColor = Color(255, 180, 40);
+				barPosX -= xOffset * 2;
+			}
+			else
+			hpColor = Color(20, 255, 20);
+
+			if (aPlant->mPlantHealth > 0)
+			{
+				DrawHealthbar(g, barPosX, barPosY, barWidth, barHeight, hpColor, aPlant->mPlantHealth, aPlant->mPlantMaxHealth);
+			}
+			break;
+		}
+		case RenderObjectType::RENDER_ITEM_HEALTHBAR_ZOMBIE:
+		{
+			Zombie* aZombie = aRenderItem.mZombie;
+			int barWidth = 3;
+			int barHeight = 55;
+			int barPosX = aZombie->mX;
+			int barPosY = aZombie->mY;
+			int xOffset = 5;
+
+			Color hpColor;
+
+			if (aZombie->mBodyHealth > 0)
+			{
+				hpColor = Color(144, 199, 0);
+				DrawHealthbar(g, barPosX, barPosY, barWidth, barHeight, hpColor, aZombie->mBodyHealth, aZombie->mBodyMaxHealth);
+			}
+			if (aZombie->mHelmHealth > 0)
+			{
+				hpColor = Color(224, 224, 0);
+				barPosX -= xOffset;
+				DrawHealthbar(g, barPosX, barPosY, barWidth, barHeight, hpColor, aZombie->mHelmHealth, aZombie->mHelmMaxHealth);
+			}
+			if (aZombie->mShieldHealth > 0)
+			{
+				hpColor = Color(56, 150, 201);
+				barPosX -= xOffset;
+				DrawHealthbar(g, barPosX, barPosY, barWidth, barHeight, hpColor, aZombie->mShieldHealth, aZombie->mShieldMaxHealth);
+			}
+			break;
+		}
 		default:
 			PVZP_ASSERT(false);
 			break;
@@ -7544,6 +7635,23 @@ void Board::Draw(Graphics* g)
 	DrawGameObjects(g);
 }
 
+void Board::DrawHealthbar(Graphics* g, int posX, int posY, int width, int height, Color color, int hp, int maxHp)
+{
+	// Outline
+	g->SetColor(Color(0,0,0));
+	g->FillRect(Rect(posX - 1, posY - 1, width + 2, height + 2));
+
+	// Hp bar base
+	g->SetColor(Color(100,100,100));
+	g->FillRect(Rect(posX, posY, width, height));
+
+	// Remaining hp
+	int hpBarHeight = height * ((float)hp/maxHp);
+	int hpBarY = posY + (height - hpBarHeight);
+	g->SetColor(color);
+	g->FillRect(Rect(posX, hpBarY, width, hpBarHeight));
+}
+
 void Board::SetMustacheMode(bool theEnableMustache)
 {
 	mApp->PlayFoley(FoleyType::FOLEY_POLEVAULT);
@@ -8465,7 +8573,7 @@ void Board::KeyChar(char theChar)
 		AddZombie(ZombieType::ZOMBIE_CATAPULT, Zombie::ZOMBIE_WAVE_DEBUG);
 		return;
 	}
-	if (theChar == '1')
+	/*if (theChar == '1') // ???
 	{
 		Plant* aPlant = GetTopPlantAt(0, 0, PlantPriority::TOPPLANT_ANY);
 		if (aPlant)
@@ -8474,7 +8582,7 @@ void Board::KeyChar(char theChar)
 			mChallenge->ZombieAtePlant(aPlant);
 			return;
 		}
-	}
+	}*/
 	if (theChar == 'B')
 	{
 		mFogBlownCountDown = 2200;

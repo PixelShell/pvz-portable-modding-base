@@ -20,7 +20,6 @@
  */
 
 #include "../Board.h"
-#include "Common.h"
 #include "GameButton.h"
 #include "../Cutscene.h"
 #include "AlmanacDialog.h"
@@ -30,10 +29,7 @@
 #include "../../Resources.h"
 #include "ExtraOptionsDialog.h"
 #include "../../ConstEnums.h"
-#include "../../PvzpLib/PvzpFoley.h"
-#include "widget/Slider.h"
 #include "widget/Checkbox.h"
-#include "../../PvzpLib/PvzpStringFile.h"
 
 using namespace Sexy;
 
@@ -45,8 +41,8 @@ ExtraOptionsDialog::ExtraOptionsDialog(LawnApp* theApp, bool theFromGameSelector
 	SetColor(Dialog::COLOR_BUTTON_TEXT, Color(255, 255, 100));
 	
 	mDebugCheckbox = MakeNewCheckbox(ExtraOptionsDialog::ExtraOptionsDialog_Debug, this, theApp->mDebugKeysEnabled);
-	mAutoCollectionCheckbox = MakeNewCheckbox(ExtraOptionsDialog::ExtraOptionsDialog_AutoCollect, this, false);
-	mHealthbarCheckbox = MakeNewCheckbox(ExtraOptionsDialog::ExtraOptionsDialog_Healthbar, this, false);
+	mAutoCollectionCheckbox = MakeNewCheckbox(ExtraOptionsDialog::ExtraOptionsDialog_AutoCollect, this, theApp->mAutoCollect);
+	mHealthbarCheckbox = MakeNewCheckbox(ExtraOptionsDialog::ExtraOptionsDialog_Healthbar, this, theApp->mHealthbarEnabled);
 	mBackButton = MakeNewButton(
 		ExtraOptionsDialog::ExtraOptionsDialog_Back,
 		this,
@@ -141,6 +137,13 @@ void ExtraOptionsDialog::CheckboxChecked(int theId, bool checked)
 		case ExtraOptionsDialog::ExtraOptionsDialog_Debug:
 			mApp->mDebugKeysEnabled = !mApp->mDebugKeysEnabled;
 			mApp->mCheatKeys = !mApp->mCheatKeys;
+			break;
+
+		case ExtraOptionsDialog::ExtraOptionsDialog_AutoCollect:
+			mApp->mAutoCollect = !mApp->mAutoCollect;
+			break;
+		case ExtraOptionsDialog::ExtraOptionsDialog_Healthbar:
+			mApp->mHealthbarEnabled = !mApp->mHealthbarEnabled;
 			break;
 	}
 }

@@ -42,6 +42,7 @@
 #include "../PvzpLib/EffectSystem.h"
 #include "../PvzpLib/PvzpStringFile.h"
 #include "Widget/AchievementsScreen.h"
+#include "graphics/Color.h"
 #include <algorithm>
 
 constinit const PlantDefinition gPlantDefs[SeedType::NUM_SEED_TYPES] = {
