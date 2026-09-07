@@ -163,7 +163,7 @@ LawnApp::LawnApp()
 	mProductVersion = PVZP_VERSION;
 	mBuildNum = PVZP_BUILD_NUMBER;
 	mCommitDate = PVZP_COMMIT_DATE;
-	std::string aTitleName = "PvZ Portable";
+	std::string aTitleName = MOD_DISPLAY_NAME;
 	mTitle = aTitleName;
 	mCustomCursorsEnabled = false;
 	mPlayerInfo = nullptr;
@@ -1258,6 +1258,14 @@ void LawnApp::Init()
 		return;
 	}
 
+	// Merge in mod-defined resources, if the mod ships a manifest.
+	const std::string& aResourceBase = GetResourceFolder();
+	if (std::filesystem::exists(std::filesystem::path(aResourceBase) / "resources" / "resources.xml"))
+	{
+		if (!mResourceManager->ReparseResourcesFile("resources/resources.xml"))
+		ShowResourceError(false);
+	}
+
 	if (!PvzpLoadResources("Init"))
 	{
 		return;
@@ -1717,6 +1725,10 @@ void LawnApp::LoadingThreadProc()
 	// Load localized properties AFTER LawnStrings so they can override string values
 	LoadProperties("properties/default.xml", false, false);
 	LoadProperties("properties/Layout.xml", false, false);
+
+	// Modded strings, loaded last so they override the rest
+	if (std::filesystem::exists(std::filesystem::path(GetResourceFolder()) / "resources" / "LawnStrings.txt"))
+		PvzpStringListReadFile("resources/LawnStrings.txt");
 
 	if (mTitleScreen)
 	{

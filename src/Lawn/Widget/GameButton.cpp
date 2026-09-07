@@ -138,6 +138,11 @@ void GameButton::Draw(Graphics* g)
 		return;
 	}
 
+	if (mId == 2) // Draw the background for the fast button, since it is not included in the resources folder
+	{
+		DrawStoneButton(g, mX, mY + 5, mWidth, mHeight, isDown, isHighLighted, "");
+	}
+
 	g->mTransX += mX;
 	g->mTransY += mY;
 	if (!mFont && mLabel.size() > 0)

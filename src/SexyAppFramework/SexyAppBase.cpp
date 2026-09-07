@@ -3426,6 +3426,7 @@ void SexyAppBase::Init()
 	if (!ChangeDirHook(mResourceDir.c_str()))
 	{
 		SetResourceFolder(mResourceDir);
+		gPakInterface->RefreshModResourceDir();
 	}
 
 	gPakInterface->AddPakFile(GetResourcePath("main.pak"));

@@ -31,6 +31,8 @@
 #include <string_view>
 #include <cstdint>
 
+
+
 class PakCollection;
 
 // a .pak file (e.g. main.pak) packs individual resource files (e.g. zombie_falling_1.ogg)
@@ -87,6 +89,8 @@ class PakInterface : public PakInterfaceBase
 public:
 	PakCollectionList		mPakCollectionList;		//+0x4: data of every pak added via AddPakFile()
 	PakRecordMap			mPakRecordMap;			//+0x10: maps every resource file name to its record
+	
+	bool					mHasModResourceDir = false;
 
 	static std::string		NormalizePakPath(std::string_view theFileName);
 
@@ -94,6 +98,8 @@ public:
 
 	PakInterface();
 	~PakInterface();
+
+	void					RefreshModResourceDir();
 
 	bool					AddPakFile(const std::string& theFileName);
 	PFILE*					FOpen(const char* theFileName, const char* theAccess) override;

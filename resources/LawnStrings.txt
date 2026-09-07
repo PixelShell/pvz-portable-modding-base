@@ -1,0 +1,8 @@
+[EXTRA_OPTIONS]
+Extra Options
+
+[EXTRA_OPTIONS_INGAME]
+Ex
+
+[BACK]
+Back

@@ -47,6 +47,16 @@ PakInterface::~PakInterface()
 {
 }
 
+namespace { constexpr std::string_view kModResourceDirName = "resources"; }
+
+void PakInterface::RefreshModResourceDir()
+{
+	const std::string& aResourceBase = Sexy::GetResourceFolder();
+	std::error_code ec;
+	mHasModResourceDir = !aResourceBase.empty() &&
+		std::filesystem::is_directory(Sexy::PathFromU8(aResourceBase) / kModResourceDirName, ec);
+}
+
 // Normalize path for pak lookup.
 std::string PakInterface::NormalizePakPath(std::string_view theFileName)
 {
@@ -189,8 +199,24 @@ bool PakInterface::AddPakFile(const std::string& theFileName)
 
 PFILE* PakInterface::FOpen(const char* theFileName, const char* anAccess)
 {
+	const std::string& aResourceBase = Sexy::GetResourceFolder();
+
 	if ((strcasecmp(anAccess, "r") == 0) || (strcasecmp(anAccess, "rb") == 0) || (strcasecmp(anAccess, "rt") == 0))
 	{
+		// Mod resources override everything else
+		if (mHasModResourceDir && !Sexy::IsPathRooted(theFileName))
+		{
+			std::string aModPath = std::string(kModResourceDirName) + "/" + theFileName;
+			if (FILE* aModFP = fcaseopenat(aResourceBase.c_str(), aModPath.c_str(), anAccess))
+			{
+				PFILE* aPFP = new PFILE;
+				aPFP->mRecord = nullptr;
+				aPFP->mPos = 0;
+				aPFP->mFP = aModFP;
+				return aPFP;
+			}
+		}
+
 		std::string aKey = NormalizePakPath(theFileName);
 		auto anItr = mPakRecordMap.find(aKey);
 		if (anItr != mPakRecordMap.end())
@@ -203,7 +229,6 @@ PFILE* PakInterface::FOpen(const char* theFileName, const char* anAccess)
 		}
 	}
 
-	const std::string& aResourceBase = Sexy::GetResourceFolder();
 	FILE* aFP = nullptr;
 	if (!aResourceBase.empty() && !Sexy::IsPathRooted(theFileName))
 	{

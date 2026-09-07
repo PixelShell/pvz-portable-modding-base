@@ -1,8 +1,15 @@
-cmake_minimum_required(VERSION 3.12...4.0)
+cmake_minimum_required(VERSION 3.25...4.0)
 
 project(pvz-portable LANGUAGES C CXX)
 
 include(CMake/ProjectVersion.cmake)
+
+file(STRINGS "${CMAKE_CURRENT_SOURCE_DIR}/mod.properties" MOD_PROPERTIES_LINES)
+foreach(line ${MOD_PROPERTIES_LINES})
+	if(line MATCHES "^([A-Za-z_]+)=(.*)$")
+		set(${CMAKE_MATCH_1} "${CMAKE_MATCH_2}")
+	endif()
+endforeach()
 
 option(BUILD_STATIC "Statically link dependencies for a standalone exe (Windows MinGW, Linux)" OFF)
 if(BUILD_STATIC)
@@ -197,8 +204,16 @@ if (LOW_MEMORY)
 endif()
 
 if(EMSCRIPTEN)
+	configure_file(
+		"${CMAKE_CURRENT_SOURCE_DIR}/wasm/shell.html"
+		"${CMAKE_CURRENT_BINARY_DIR}/shell.html"
+		@ONLY
+	)
+	file(GLOB_RECURSE MOD_RESOURCE_FILES CONFIGURE_DEPENDS
+		"${CMAKE_CURRENT_SOURCE_DIR}/resources/*")
 	set_property(TARGET pvz-portable APPEND PROPERTY LINK_DEPENDS
 		"${CMAKE_CURRENT_SOURCE_DIR}/wasm/shell.html"
+		${MOD_RESOURCE_FILES}
 	)
 	target_link_libraries(pvz-portable PRIVATE
 		SDL2_mixer_ext_Static
@@ -214,6 +229,7 @@ if(EMSCRIPTEN)
 		"SHELL:-sUSE_MPG123=1"
 		"SHELL:-fexceptions"
 		"SHELL:-sASYNCIFY"
+		"SHELL:-sASYNCIFY_STACK_SIZE=131072"   # 128 KB instead of the 4 KB default
 		"SHELL:-sALLOW_MEMORY_GROWTH=1"
 		"SHELL:-sMAXIMUM_MEMORY=1073741824"
 		"SHELL:-sGROWABLE_ARRAYBUFFERS=0"
@@ -222,8 +238,10 @@ if(EMSCRIPTEN)
 		"SHELL:-sINVOKE_RUN=0"
 		"SHELL:-lidbfs.js"
 		"SHELL:--shell-file ${CMAKE_CURRENT_SOURCE_DIR}/wasm/shell.html"
+		"SHELL:--preload-file ${CMAKE_CURRENT_SOURCE_DIR}/resources@/resources"
+		"SHELL:--shell-file ${CMAKE_CURRENT_BINARY_DIR}/shell.html"
 	)
-	set_target_properties(pvz-portable PROPERTIES SUFFIX ".html")
+	set_target_properties(pvz-portable PROPERTIES OUTPUT_NAME "index" SUFFIX ".html")
 else()
 	target_link_libraries(pvz-portable PRIVATE
 		SDL2_mixer_ext_Static 
@@ -238,6 +256,14 @@ else()
 		${SDL2_LINK_TARGET}
 		Threads::Threads
 	)
+endif()
+
+target_compile_definitions(pvz-portable PRIVATE
+	$<$<COMPILE_LANGUAGE:CXX>:MOD_DISPLAY_NAME="${MOD_DISPLAY_NAME}">
+)
+
+if(WIN32 OR LINUX)
+	set_target_properties(pvz-portable PROPERTIES OUTPUT_NAME "${MOD_EXECUTABLE_NAME}")
 endif()
 
 if (WIN32)

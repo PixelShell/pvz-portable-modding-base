@@ -1,0 +1,7 @@
+<ResourceManifest>
+  <Resources id="Init">
+    <SetDefaults path="images" idprefix=""/>
+    <Image id="IMAGE_FASTBUTTON" path="button_speed.png"/>
+    <Image id="IMAGE_FASTBUTTON_HIGHLIGHT" path="button_speed_highlight.png"/>
+  </Resources>
+</ResourceManifest>

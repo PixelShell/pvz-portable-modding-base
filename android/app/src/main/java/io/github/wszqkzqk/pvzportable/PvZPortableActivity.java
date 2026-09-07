@@ -49,6 +49,10 @@ public class PvZPortableActivity extends SDLActivity {
         if (extDir != null && !extDir.exists()) extDir.mkdirs();
         Log.i(TAG, "Resource dir: " + (extDir != null ? extDir.getAbsolutePath() : "null"));
 
+        if (extDir != null) {
+            ModResourceExtractor.extract(this, extDir);
+        }
+
         if (!hasGameResources(extDir)) {
             super.onCreate(savedInstanceState);
             startActivity(new Intent(this, ResourceImportActivity.class));
