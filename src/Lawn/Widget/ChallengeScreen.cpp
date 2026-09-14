@@ -261,6 +261,9 @@ void ChallengeScreen::SetUnlockChallengeIndex(ChallengePage thePage, bool theIsI
 
 int ChallengeScreen::MoreTrophiesNeeded(int theChallengeIndex)
 {
+	if (mApp->mDebugKeysEnabled) // Unlock all minigames in debug mode
+		return false;
+
 	const ChallengeDefinition& aDef = GetChallengeDefinition(theChallengeIndex);
 	if (mApp->mGameMode == GAMEMODE_UPSELL && mApp->mGameScene == SCENE_LEVEL_INTRO)
 	{
