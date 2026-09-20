@@ -769,7 +769,7 @@ void Coin::Update()
 		}
 	}
 
-	if (mApp->mAutoCollect)
+	if (mApp->mAutoCollect && (mType == CoinType::COIN_SILVER || mType == CoinType::COIN_GOLD || mType == CoinType::COIN_DIAMOND||mType == CoinType::COIN_SUN))
     {
         int aMouseX = mApp->mWidgetManager->mLastMouseX - mX;
         int aMouseY = mApp->mWidgetManager->mLastMouseY - mY;
