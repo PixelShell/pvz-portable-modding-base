@@ -7891,7 +7891,7 @@ void Board::KeyChar(char theChar)
 			}
 		}
 	}
-	if (theChar == '\"' && mShowShovel)
+	if (theChar == 'q' && mShowShovel)
 	{
 		if (mCursorObject->mCursorType != CursorType::CURSOR_TYPE_SHOVEL)
 		{
@@ -8322,7 +8322,7 @@ void Board::KeyChar(char theChar)
 		}
 	}
 
-	if (theChar == 'q')
+	if (theChar == 'Q')
 	{
 		if (mApp->IsSurvivalEndless(mApp->mGameMode))
 		{
